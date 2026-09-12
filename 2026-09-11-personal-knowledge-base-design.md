@@ -1,8 +1,14 @@
 # 知识库 Claude Code 插件 — 设计文档
 
 - **日期**：2026-09-11
-- **状态**：草案，待 user 审阅
-- **模板参照**：`D:\workspaces\plugins\lark-bitable-plugin`
+- **状态**：已定稿并实施（见 `mcp-server/`、`plugin/`）
+- **模板参照**：`F:\workspace\plugins\lark-bitable-plugin`
+- **⚠ 命名更新（2026-09-12 user 反馈，实施以此为准）**：
+  - 环境变量前缀 `KB_*` → **`LIBRARY_*`**（如 `KB_ROOT` → `LIBRARY_ROOT`，默认 `~/library`）
+  - 元数据目录 `.kb` → **`.library`**；sqlite 文件 `kb.sqlite` → **`library.sqlite`**
+  - skill `kb-organize` → **`library-organize`**；`kb-query` → **`library`**
+  - mcp-server 包名 → **`@jesonliu/library-mcp`**；MCP 工具 `mcp__library__{search,read,list,write,delete}`
+  - 正文其余 `kb_*` / `KB_*` / `kb-` 字样均为历史草案写法
 
 ---
 
