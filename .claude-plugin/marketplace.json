@@ -1,0 +1,14 @@
+{
+  "name": "library",
+  "owner": {
+    "name": "jesonliu"
+  },
+  "plugins": [
+    {
+      "name": "library",
+      "source": "./plugin",
+      "description": "个人知识库：本地 .md + SQLite FTS5 trigram 全文检索。飞书文件整理入库与自然语言检索问答；默认只读，写入需显式开启",
+      "version": "0.1.0"
+    }
+  ]
+}

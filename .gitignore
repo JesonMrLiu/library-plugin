@@ -1,0 +1,12 @@
+mcp-server/node_modules/
+mcp-server/dist/
+.npmrc
+*.log
+.env
+.env.local
+.env.*
+!.env.example
+coverage/
+.setting.local/
+.claude
+.workbuddy

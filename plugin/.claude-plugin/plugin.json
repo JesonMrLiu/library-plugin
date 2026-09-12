@@ -1,0 +1,38 @@
+{
+  "name": "library",
+  "description": "个人知识库：本地 .md + SQLite FTS5 trigram 全文检索。飞书文件整理入库（摘要 + 双链 + 标签）与自然语言检索问答；默认只读，写入需显式开启",
+  "version": "0.1.0",
+  "author": {
+    "name": "jesonliu"
+  },
+  "license": "MIT",
+  "keywords": [
+    "knowledge-base",
+    "library",
+    "notes",
+    "mcp",
+    "fts5",
+    "markdown"
+  ],
+  "mcpServers": {
+    "library": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@jesonliu/library-mcp"
+      ],
+      "env": {
+        "LIBRARY_ROOT": "${LIBRARY_ROOT}",
+        "LIBRARY_DOCS_SUBDIR": "${LIBRARY_DOCS_SUBDIR:-docs}",
+        "LIBRARY_METADATA_DIR": "${LIBRARY_METADATA_DIR:-.library}",
+        "LIBRARY_SQLITE_NAME": "${LIBRARY_SQLITE_NAME:-library.sqlite}",
+        "LIBRARY_ALLOW_WRITE": "${LIBRARY_ALLOW_WRITE:-false}",
+        "LIBRARY_ALLOW_DELETE": "${LIBRARY_ALLOW_DELETE:-false}",
+        "LIBRARY_SEARCH_DEFAULT_TOPK": "${LIBRARY_SEARCH_DEFAULT_TOPK:-5}",
+        "LIBRARY_LIST_DEFAULT_LIMIT": "${LIBRARY_LIST_DEFAULT_LIMIT:-20}",
+        "LIBRARY_LOG_LEVEL": "${LIBRARY_LOG_LEVEL:-info}",
+        "LIBRARY_ID_PREFIX": "${LIBRARY_ID_PREFIX:-doc_}"
+      }
+    }
+  }
+}
