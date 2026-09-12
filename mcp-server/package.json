@@ -1,0 +1,56 @@
+{
+  "name": "@jesonliu/library-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for local personal library — .md + SQLite FTS5 trigram, read-only by default",
+  "main": "dist/index.js",
+  "bin": {
+    "library-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --platform=node --target=node18 --format=cjs --outdir=dist --external:better-sqlite3 --banner:js=\"#!/usr/bin/env node\"",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "typecheck": "node --max-old-space-size=8192 ./node_modules/typescript/bin/tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run typecheck && npm run test && npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "modelcontextprotocol",
+    "knowledge-base",
+    "library",
+    "fts5",
+    "sqlite",
+    "markdown",
+    "claude"
+  ],
+  "author": "jesonliu",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^3.25.76",
+    "better-sqlite3": "^11.0.0",
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/better-sqlite3": "^7.6.0",
+    "esbuild": "^0.28.2",
+    "tsx": "^4.23.13",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

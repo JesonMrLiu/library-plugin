@@ -1,0 +1,10 @@
+src/
+tests/
+tsconfig.json
+vitest.config.ts
+.gitignore
+.npmignore
+*.log
+.env
+.env.local
+coverage/
