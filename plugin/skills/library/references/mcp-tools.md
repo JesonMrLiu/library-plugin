@@ -1,6 +1,6 @@
 # library-mcp 工具速查（检索场景）
 
-MCP server：`library`（@jesonliu/library-mcp，stdio）。工具名前缀 `mcp__library__`。
+MCP server：`library-mcp`（@jesonliu/library-mcp，stdio）。工具名前缀 `mcp__library-mcp__`。
 本 skill 只用 3 个只读工具（search / read / list），全部永远可用。
 
 ## search

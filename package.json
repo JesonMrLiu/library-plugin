@@ -1,6 +1,6 @@
 {
   "name": "library-plugin",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "本地个人知识库 Claude Code 插件：skill + 独立 mcp-server（@jesonliu/library-mcp）",
   "private": true,
   "type": "module",

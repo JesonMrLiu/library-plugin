@@ -1,6 +1,6 @@
 # 存储格式与 frontmatter 规范
 
-> frontmatter 由 `mcp__library__write` 自动生成，模型只负责提供字段值；此文档用于理解字段语义 + 手工编辑 .md 时的规范。
+> frontmatter 由 `mcp__library-mcp__write` 自动生成，模型只负责提供字段值；此文档用于理解字段语义 + 手工编辑 .md 时的规范。
 
 ## .md 文件布局
 

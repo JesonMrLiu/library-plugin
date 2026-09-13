@@ -6,9 +6,9 @@ description: >
   "找一下笔记"、"查一下知识库"、"我之前总结过什么"、"库里搜一下"时，使用此 skill。
 argument-hint: "[自然语言问题或关键词，如：关于 trigram 的笔记]"
 allowed-tools:
-  - mcp__library__search
-  - mcp__library__read
-  - mcp__library__list
+  - mcp__library-mcp__search
+  - mcp__library-mcp__read
+  - mcp__library-mcp__list
   - mcp__lcb-notify__send_text
 ---
 
@@ -29,8 +29,8 @@ allowed-tools:
 | 步骤 | 动作 | 要点 |
 |------|------|------|
 | ① 解析意图 | 提取关键词 | 从问题里提 1-3 个实质词（≥3 字中文短语召回最好）；识别可选过滤（type/tags） |
-| ② search | `mcp__library__search` | top_k=5；0 命中 → 换同义关键词放宽重试一次，仍 0 → 明说并引导入库 |
-| ③ read | `mcp__library__read` | 只 read 与问题真正相关的 1-3 篇（snippet 判断），不要全读 |
+| ② search | `mcp__library-mcp__search` | top_k=5；0 命中 → 换同义关键词放宽重试一次，仍 0 → 明说并引导入库 |
+| ③ read | `mcp__library-mcp__read` | 只 read 与问题真正相关的 1-3 篇（snippet 判断），不要全读 |
 | ④ 综合 | Claude 整理 | 融合多篇观点，标注每条来源 doc_id，指出笔记间的演进/矛盾 |
 | ⑤ 回复 | `send_text` 卡片 | 标题 + 直接回答 + 要点（带来源）+ "是否深入？" |
 

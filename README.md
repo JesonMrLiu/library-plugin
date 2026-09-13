@@ -12,7 +12,9 @@
                                       ├── Skill: library-organize（整理入库）
                                       ├── Skill: library（检索问答）
                                       └── MCP → @jesonliu/library-mcp（stdio）
-                                                └── .md 真相存储 + SQLite FTS5 索引
+                                      │           └── .md 真相存储 + SQLite FTS5 索引
+                                      └── MCP → @larksuiteoapi/lark-mcp（stdio，飞书只读）
+                                                  └── 云文档 / Wiki / 多维表格读取（17 个只读工具）
 
 ~/library/                 ← LIBRARY_ROOT（可配）
 ├── docs/doc_2026-09-12_001.md   # 笔记（真相，可手工编辑）
@@ -30,12 +32,26 @@
 setx LIBRARY_ROOT "D:/workspaces/kb"       # 缺省 ~/library
 setx LIBRARY_ALLOW_WRITE "true"            # 需要整理入库时
 setx LIBRARY_ALLOW_DELETE "true"           # 需要软删除时（还需 WRITE 同开）
+setx LARK_APP_ID "cli_xxxx"                # 启用飞书读取（见下节）
+setx LARK_APP_SECRET "yyyy"
 
 # 2. 装插件（本地路径方式）
 claude plugin add F:/workspace/plugins/library-plugin
 
 # 3. 重启 Claude Code 会话（连上飞书桥接后即可在飞书里用）
 ```
+
+### 飞书读取能力（lark-all-mcp server，可选但推荐）
+
+插件内置飞书官方 [@larksuiteoapi/lark-mcp](https://github.com/larksuite/lark-openapi-mcp) 作为第二个 MCP server（键名 `lark-all-mcp`，工具前缀 `mcp__lark-all-mcp__*`），默认只注册 **17 个只读工具**（云文档 / Wiki / 多维表格），与插件「默认只读」哲学一致：
+
+1. 在[飞书开放平台](https://open.feishu.cn/)创建一个**自建应用**，拿到 App ID / App Secret
+2. 为应用开通只读权限（权限页搜索并开启）：云文档查看（`docx:document:readonly`、`docs:document.content:readonly`、`drive:drive:readonly` 及目录内细分只读 scope）、知识库只读（`wiki:wiki:readonly`）、多维表格只读（`bitable:app:readonly`）——以开放平台权限页实际名称为准
+3. `setx LARK_APP_ID` / `setx LARK_APP_SECRET` 后重启会话
+4. **应用身份的限制**：默认以应用身份（tenant_access_token）调用，只能读到「对应用可见」的文档——要读取的文档/多维表格需把该应用（协作者里搜应用名，或把机器人加进群后文档分享给它）添加为协作者
+5. **进阶（读个人文档免共享）**：按官方文档先 `npx -y @larksuiteoapi/lark-mcp login -a cli_xxxx -s yyyy`（一次性浏览器授权；应用需先配置重定向 URL `http://localhost:3000/callback`），再在本地 `plugin.json` 的 `lark-all-mcp` server args 中追加 `"--oauth", "--token-mode", "user_access_token"`，即可直接以你的身份读个人文档
+
+未配置 `LARK_APP_ID` 时 lark-all-mcp server 启动失败，**不影响** library-mcp server 的本地检索问答。与宿主环境已装的其他飞书 MCP（如 `lark-bitable`）可共存（工具前缀不同）；功能重复时可停用其一。
 
 ## 使用
 
@@ -69,8 +85,12 @@ claude plugin add F:/workspace/plugins/library-plugin
 | `LIBRARY_LIST_DEFAULT_LIMIT` | `20` | list 默认返回条数 |
 | `LIBRARY_LOG_LEVEL` | `info` | `debug` / `info` / `warn` / `error`（stderr） |
 | `LIBRARY_ID_PREFIX` | `doc_` | doc_id 前缀 |
+| `LARK_APP_ID` | 空 | 飞书自建应用 App ID（启用 lark 只读 server 必填） |
+| `LARK_APP_SECRET` | 空 | 飞书自建应用 App Secret |
+| `LARK_TOOLS` | 17 个只读工具白名单 | 覆盖 lark server 启用的工具集（逗号分隔，见 [预设文档](https://github.com/larksuite/lark-openapi-mcp/blob/main/docs/reference/tool-presets/presets-zh.md)） |
+| `LARK_DOMAIN` | `https://open.feishu.cn` | 国际版 Lark 改为 `https://open.larksuite.com` |
 
-## MCP 工具（`mcp__library__*`）
+## MCP 工具（`mcp__library-mcp__*`）
 
 | 工具 | 注册条件 | 用途 |
 |------|---------|------|
@@ -79,6 +99,8 @@ claude plugin add F:/workspace/plugins/library-plugin
 | `list` | 永远 | 浏览文档列表（type / tags / status / limit） |
 | `write` | `ALLOW_WRITE=true` | 写入新文档（type / title / content / tags / source / links） |
 | `delete` | `ALLOW_WRITE` + `ALLOW_DELETE` | 软删除（必须传 `confirm: true`；.md 保留可恢复） |
+
+飞书只读工具在另一个 server（`mcp__lark-all-mcp__*`，17 个）：`docs_v1_content_get`（文档 Markdown）、`docx_v1_document_rawContent`（纯文本）、`docx_builtin_search` / `wiki_v1_node_search`（搜索）、`wiki_v2_space_getNode`（wiki token 换取）、`drive_v1_meta_batchQuery`（元数据）、`bitable_v1_app_get` / `appTable_list` / `appTableField_list` / `appTableRecord_search` 等（多维表格）。明细见 `plugin/skills/library-organize/references/mcp-tools.md`。
 
 ## 开发
 
@@ -112,7 +134,7 @@ better-sqlite3 为 native 模块：Windows 需预编译支持（Node LTS 一般�
 ```
 ├── .claude-plugin/marketplace.json     # 插件市场 entry
 ├── plugin/
-│   ├── .claude-plugin/plugin.json      # mcpServers.library → npx
+│   ├── .claude-plugin/plugin.json      # mcpServers: library-mcp + lark-all-mcp → npx
 │   └── skills/
 │       ├── library-organize/           # 整理入库 skill
 │       └── library/                    # 检索问答 skill

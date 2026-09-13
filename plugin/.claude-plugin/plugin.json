@@ -1,7 +1,7 @@
 {
   "name": "library",
-  "description": "个人知识库：本地 .md + SQLite FTS5 trigram 全文检索。飞书文件整理入库（摘要 + 双链 + 标签）与自然语言检索问答；默认只读，写入需显式开启",
-  "version": "0.1.0",
+  "description": "个人知识库：本地 .md + SQLite FTS5 trigram 全文检索。飞书文件整理入库（摘要 + 双链 + 标签）与自然语言检索问答；自带飞书云文档/多维表格只读 MCP；默认只读，写入需显式开启",
+  "version": "0.2.0",
   "author": {
     "name": "jesonliu"
   },
@@ -15,7 +15,23 @@
     "markdown"
   ],
   "mcpServers": {
-    "library": {
+    "lark-all-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@larksuiteoapi/lark-mcp",
+        "mcp",
+        "-l",
+        "zh"
+      ],
+      "env": {
+        "APP_ID": "${LARK_APP_ID}",
+        "APP_SECRET": "${LARK_APP_SECRET}",
+        "LARK_TOOLS": "${LARK_TOOLS:-docx.v1.document.get,docx.v1.document.rawContent,docs.v1.content.get,docx.builtin.search,drive.v1.meta.batchQuery,drive.v1.file.list,wiki.v2.space.list,wiki.v2.space.getNode,wiki.v2.spaceNode.list,wiki.v1.node.search,bitable.v1.app.get,bitable.v1.appTable.list,bitable.v1.appTableField.list,bitable.v1.appTableView.list,bitable.v1.appTableRecord.list,bitable.v1.appTableRecord.search,bitable.v1.appTableRecord.get}",
+        "LARK_DOMAIN": "${LARK_DOMAIN:-https://open.feishu.cn}"
+      }
+    },
+    "library-mcp": {
       "command": "npx",
       "args": [
         "-y",

@@ -1,6 +1,6 @@
 {
   "name": "@jesonliu/library-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MCP server for local personal library — .md + SQLite FTS5 trigram, read-only by default",
   "main": "dist/index.js",
   "bin": {

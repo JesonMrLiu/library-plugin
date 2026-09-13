@@ -35,7 +35,7 @@ console.log('[dev-link] 切回发布版：node scripts/dev-link.mjs revert');
 // 直接改 JSON 对象（正则 replace 对 npx↔node 双向切换不可靠）
 function patch(mode) {
   const json = JSON.parse(readFileSync(PLUGIN_JSON, 'utf8'));
-  json.mcpServers.library.command = mode.command;
-  json.mcpServers.library.args = mode.args;
+  json.mcpServers['library-mcp'].command = mode.command;
+  json.mcpServers['library-mcp'].args = mode.args;
   writeFileSync(PLUGIN_JSON, JSON.stringify(json, null, 2) + '\n', 'utf8');
 }

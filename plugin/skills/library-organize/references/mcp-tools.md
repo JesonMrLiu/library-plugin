@@ -1,6 +1,52 @@
 # library-mcp 工具速查（整理场景）
 
-MCP server：`library`（@jesonliu/library-mcp，stdio）。工具名前缀 `mcp__library__`。
+MCP server：`library-mcp`（@jesonliu/library-mcp，stdio）。工具名前缀 `mcp__library-mcp__`。
+
+# 飞书只读工具速查（lark server，插件自带）
+
+MCP server：`lark-all-mcp`（@larksuiteoapi/lark-mcp，stdio）。工具名前缀 `mcp__lark-all-mcp__`。
+默认只注册 17 个只读工具（应用身份 tenant_access_token）；白名单可用 env `LARK_TOOLS` 覆盖，切换用户身份见 README「飞书读取能力」。
+
+## 云文档
+
+| 工具 | 用途 | 关键参数 |
+|------|------|---------|
+| `docs_v1_content_get` | 新版文档 Markdown 内容（首选，保留结构） | `doc_id` |
+| `docx_v1_document_rawContent` | 文档纯文本（Markdown 失败时兜底） | `document_id` |
+| `docx_v1_document_get` | 文档基本信息（标题、版本） | `document_id` |
+| `docx_builtin_search` | 按名称搜索云文档 | `query`（关键词） |
+| `drive_v1_meta_batchQuery` | 文件元数据（标题/类型/链接/所有者） | `request_tokens[]`、`request_types[]`（docx/wiki 等） |
+| `drive_v1_file_list` | 文件夹内文件清单 | `folder_token`、分页参数 |
+
+## 知识库 Wiki
+
+| 工具 | 用途 | 关键参数 |
+|------|------|---------|
+| `wiki_v2_space_getNode` | wiki token → obj_token + obj_type（读 wiki 的必经一步） | `token`（链接里的 wiki token） |
+| `wiki_v2_space_list` | 有权限的知识空间列表 | 分页参数 |
+| `wiki_v2_spaceNode_list` | 空间子节点列表（浏览目录树） | `space_id`、`parent_node_token`（可选） |
+| `wiki_v1_node_search` | 按名称搜索 wiki 节点 | `query`、`space_ids[]`（可选） |
+
+## 多维表格 Bitable
+
+| 工具 | 用途 | 关键参数 |
+|------|------|---------|
+| `bitable_v1_app_get` | Base 元数据（名称、是否高级权限） | `app_token` |
+| `bitable_v1_appTable_list` | 数据表清单（table_id + 名称） | `app_token` |
+| `bitable_v1_appTableField_list` | 字段清单（名称/类型/选项，理解记录必看） | `app_token`、`table_id` |
+| `bitable_v1_appTableView_list` | 视图清单 | `app_token`、`table_id` |
+| `bitable_v1_appTableRecord_search` | 按条件筛选记录（单次 ≤500 行，支持分页） | `app_token`、`table_id`、筛选/排序体 |
+| `bitable_v1_appTableRecord_list` | 分页遍历全量记录（单次 ≤500 行） | `app_token`、`table_id`、`page_size`/`page_token` |
+| `bitable_v1_appTableRecord_get` | 按 record_id 取单条 | `app_token`、`table_id`、`record_id` |
+
+## 错误 → 动作
+
+| 现象 | 动作 |
+|------|------|
+| 权限不足 / 无权限（如 99991672、Forbidden） | 应用身份读不到该文档：请用户把应用（机器人）加为该文档协作者，或参照 README 切换用户身份；不要反复重试 |
+| lark-all-mcp 工具不在工具列表 / server 未连接 | 检查 `LARK_APP_ID` / `LARK_APP_SECRET` 是否已设置并重启会话 |
+| wiki 读取 404 | token 换 obj_token 失败：确认链接完整、节点未删除；重试一次仍失败则请用户粘贴内容 |
+
 
 ## search（永远可用）
 
