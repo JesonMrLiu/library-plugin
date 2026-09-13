@@ -13,8 +13,10 @@
                                       ├── Skill: library（检索问答）
                                       └── MCP → @jesonliu/library-mcp（stdio）
                                       │           └── .md 真相存储 + SQLite FTS5 索引
-                                      └── MCP → @larksuiteoapi/lark-mcp（stdio，飞书只读）
+                                      └── MCP → @larksuiteoapi/lark-mcp（stdio，飞书只读，需自建应用）
                                                   └── 云文档 / Wiki / 多维表格读取（17 个只读工具）
+                                      └── MCP → @playwright/mcp（stdio，浏览器降级）
+                                                  └── lark 失败时开浏览器读文档（免建应用，扫码登录一次）
 
 ~/library/                 ← LIBRARY_ROOT（可配）
 ├── docs/doc_2026-09-12_001.md   # 笔记（真相，可手工编辑）
@@ -43,7 +45,7 @@ claude plugin add F:/workspace/plugins/library-plugin
 
 ### 飞书读取能力（lark-all-mcp server，可选但推荐）
 
-插件内置飞书官方 [@larksuiteoapi/lark-mcp](https://github.com/larksuite/lark-openapi-mcp) 作为第二个 MCP server（键名 `lark-all-mcp`，工具前缀 `mcp__lark-all-mcp__*`），默认只注册 **17 个只读工具**（云文档 / Wiki / 多维表格），与插件「默认只读」哲学一致：
+插件内置飞书官方 [@larksuiteoapi/lark-mcp](https://github.com/larksuite/lark-openapi-mcp) 作为飞书读取的主 MCP server（键名 `lark-all-mcp`，工具前缀 `mcp__lark-all-mcp__*`），默认只注册 **17 个只读工具**（云文档 / Wiki / 多维表格），与插件「默认只读」哲学一致：
 
 1. 在[飞书开放平台](https://open.feishu.cn/)创建一个**自建应用**，拿到 App ID / App Secret
 2. 为应用开通只读权限（权限页搜索并开启）：云文档查看（`docx:document:readonly`、`docs:document.content:readonly`、`drive:drive:readonly` 及目录内细分只读 scope）、知识库只读（`wiki:wiki:readonly`）、多维表格只读（`bitable:app:readonly`）——以开放平台权限页实际名称为准
@@ -52,6 +54,16 @@ claude plugin add F:/workspace/plugins/library-plugin
 5. **进阶（读个人文档免共享）**：按官方文档先 `npx -y @larksuiteoapi/lark-mcp login -a cli_xxxx -s yyyy`（一次性浏览器授权；应用需先配置重定向 URL `http://localhost:3000/callback`），再在本地 `plugin.json` 的 `lark-all-mcp` server args 中追加 `"--oauth", "--token-mode", "user_access_token"`，即可直接以你的身份读个人文档
 
 未配置 `LARK_APP_ID` 时 lark-all-mcp server 启动失败，**不影响** library-mcp server 的本地检索问答。与宿主环境已装的其他飞书 MCP（如 `lark-bitable`）可共存（工具前缀不同）；功能重复时可停用其一。
+
+### playwright 浏览器降级（lark-playwright server，免配置）
+
+插件还内置微软官方 [@playwright/mcp](https://github.com/microsoft/playwright-mcp) 作为第三个 MCP server（键名 `lark-playwright`，工具前缀 `mcp__lark-playwright__browser_*`），**零配置**：不需要任何环境变量。
+
+- **触发时机**：lark-all-mcp 工具调用失败或 server 未连接时（如未配 `LARK_APP_ID`、文档未给应用开协作者权限），`library-organize` 对**文档类链接**（`/docx/`、`/wiki/`）自动降级为浏览器读取，用户无感
+- **首次使用**：弹出浏览器窗口扫码登录一次飞书；登录态保存在 playwright 专属持久 profile，跨会话保持，之后免登录
+- **局限**：`/base/` 多维表格不支持浏览器降级（网页版虚拟滚动 + 懒加载，无法可靠全量读取，此时引导粘贴内容或配置 APP_ID）；作者/创建时间等元数据拿不到
+- **自定义**（改 `plugin.json` 的 `lark-playwright` args）：`--browser msedge`（未装 Chrome 时）；`--user-data-dir <目录>`（与其他 playwright MCP 实例争用默认 profile 时，Windows 多实例常见）；`--headless`（不弹窗口，但首次登录仍需要可见窗口）
+- 本 server 启动失败（如未装浏览器）不影响 library-mcp / lark-all-mcp 正常工作
 
 ## 使用
 
@@ -90,6 +102,8 @@ claude plugin add F:/workspace/plugins/library-plugin
 | `LARK_TOOLS` | 17 个只读工具白名单 | 覆盖 lark server 启用的工具集（逗号分隔，见 [预设文档](https://github.com/larksuite/lark-openapi-mcp/blob/main/docs/reference/tool-presets/presets-zh.md)） |
 | `LARK_DOMAIN` | `https://open.feishu.cn` | 国际版 Lark 改为 `https://open.larksuite.com` |
 
+`lark-playwright` server（浏览器降级）不需要任何环境变量。
+
 ## MCP 工具（`mcp__library-mcp__*`）
 
 | 工具 | 注册条件 | 用途 |
@@ -101,6 +115,8 @@ claude plugin add F:/workspace/plugins/library-plugin
 | `delete` | `ALLOW_WRITE` + `ALLOW_DELETE` | 软删除（必须传 `confirm: true`；.md 保留可恢复） |
 
 飞书只读工具在另一个 server（`mcp__lark-all-mcp__*`，17 个）：`docs_v1_content_get`（文档 Markdown）、`docx_v1_document_rawContent`（纯文本）、`docx_builtin_search` / `wiki_v1_node_search`（搜索）、`wiki_v2_space_getNode`（wiki token 换取）、`drive_v1_meta_batchQuery`（元数据）、`bitable_v1_app_get` / `appTable_list` / `appTableField_list` / `appTableRecord_search` 等（多维表格）。明细见 `plugin/skills/library-organize/references/mcp-tools.md`。
+
+浏览器降级工具在第三个 server（`mcp__lark-playwright__browser_*`）：`browser_navigate` / `browser_snapshot` / `browser_evaluate` 等，降级 SOP 见 `plugin/skills/library-organize/references/playwright-fallback.md`。
 
 ## 开发
 
@@ -134,7 +150,7 @@ better-sqlite3 为 native 模块：Windows 需预编译支持（Node LTS 一般�
 ```
 ├── .claude-plugin/marketplace.json     # 插件市场 entry
 ├── plugin/
-│   ├── .claude-plugin/plugin.json      # mcpServers: library-mcp + lark-all-mcp → npx
+│   ├── .claude-plugin/plugin.json      # mcpServers: library-mcp + lark-all-mcp + lark-playwright → npx
 │   └── skills/
 │       ├── library-organize/           # 整理入库 skill
 │       └── library/                    # 检索问答 skill

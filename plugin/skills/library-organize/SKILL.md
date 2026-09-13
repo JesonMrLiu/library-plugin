@@ -13,6 +13,7 @@ allowed-tools:
   - mcp__library-mcp__write
   - mcp__lcb-notify__send_text
   - mcp__lark-all-mcp
+  - mcp__lark-playwright
 ---
 
 # 飞书文件整理入库（library-organize）
@@ -31,7 +32,7 @@ allowed-tools:
 
 | 步骤 | 动作 | 要点 |
 |------|------|------|
-| ① 读内容 | lark-all-mcp 飞书只读工具 / 用户粘贴 | 拿到标题 + 正文；读不到链接时请用户粘贴关键内容，不要卡死 |
+| ① 读内容 | lark-all-mcp 飞书只读工具 / playwright 浏览器降级 / 用户粘贴 | 拿到标题 + 正文；读不到链接时请用户粘贴关键内容，不要卡死 |
 | ② 查历史 | `mcp__library-mcp__search` | 用内容核心关键词（3-5 个）检索，top_k=5；无历史也继续（首篇笔记） |
 | ③ 生成整理稿 | Claude 分析 | 决定 type（summary/archive）+ 正文模板 + tags + links（指向②命中的 doc_id） |
 | ④ 卡片确认 | `send_text` | 展示标题/要点/tags/双链，明确问"确认写入知识库？" |
@@ -51,7 +52,8 @@ allowed-tools:
 | 只有文档名、没链接 | `docx_builtin_search` / `wiki_v1_node_search` 搜索后向用户确认目标 |
 
 - 多维表格记录量大时分页取，整理时优先提炼结构（字段含义 + 关键记录），不要把全表原样塞进笔记
-- lark-all-mcp 工具报权限错误（应用身份读不到该文档）→ 请用户把应用加为该文档协作者，或参照 README 切换用户身份；不要反复重试
+- lark-all-mcp 工具报权限错误（应用身份读不到该文档）→ 文档类链接自动转 playwright 降级读取，并在回复里提示长期解法（把应用加为该文档协作者，或参照 README 切换用户身份）；不要反复重试 lark 工具
+- **playwright 浏览器降级（lark-all-mcp 失败/未连接时自动触发）**：文档类链接（`/docx/`、`/wiki/`）用 `mcp__lark-playwright__*` 浏览器读取，SOP 见 [references/playwright-fallback.md](references/playwright-fallback.md)；首次会弹浏览器窗口扫码登录一次，之后免登录。`/base/` 多维表格**不支持**浏览器降级 → 引导用户粘贴或按 README 配置 APP_ID。降级路径只读，绝不点击任何提交/分享/编辑按钮
 
 ## 2. type 怎么选
 
@@ -92,6 +94,7 @@ frontmatter 字段与 tags/links 规范：[references/frontmatter-schema.md](ref
 ## 5. 工具速查
 
 5 个工具的完整参数与错误码：[references/mcp-tools.md](references/mcp-tools.md)
+playwright 浏览器降级 SOP（lark server 失败时用）：[references/playwright-fallback.md](references/playwright-fallback.md)
 
 ## 6. 错误诊断
 
@@ -101,5 +104,6 @@ frontmatter 字段与 tags/links 规范：[references/frontmatter-schema.md](ref
 | 提示 DAILY_LIMIT | 当日已写 999 篇（多为异常循环），停下来向用户报告 |
 | 提示 EMPTY_QUERY | search 关键词清洗后为空，换实质关键词 |
 | 提示 DOC_NOT_FOUND | links 里指向了不存在的 doc_id，从 search 结果重新取 |
-| lark-all-mcp 工具报权限不足/无权限 | 应用身份（tenant_access_token）读不到该文档：请用户把应用加为协作者，或参照 README 切换用户身份 |
-| lark-all-mcp server 未连接/工具不存在 | 检查 `LARK_APP_ID` / `LARK_APP_SECRET` 是否已设置并重启会话；未配置时引导用户按 README「飞书读取能力」开通 |
+| lark-all-mcp 工具报权限不足/无权限 | 应用身份（tenant_access_token）读不到该文档：文档类链接自动转 playwright 降级读取，并提示长期解法（把应用加为协作者，或参照 README 切换用户身份） |
+| lark-all-mcp server 未连接/工具不存在 | 文档类链接自动转 playwright 降级（见 [references/playwright-fallback.md](references/playwright-fallback.md)）；同时检查 `LARK_APP_ID` / `LARK_APP_SECRET` 是否已设置并重启会话，长期解法见 README「飞书读取能力」 |
+| playwright 降级失败（浏览器启动失败 / profile 锁 / 登录超时） | 放弃降级，回退到请用户粘贴关键内容；排查见 [references/playwright-fallback.md](references/playwright-fallback.md) |

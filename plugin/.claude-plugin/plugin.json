@@ -31,6 +31,13 @@
         "LARK_DOMAIN": "${LARK_DOMAIN:-https://open.feishu.cn}"
       }
     },
+    "lark-playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp"
+      ]
+    },
     "library-mcp": {
       "command": "npx",
       "args": [
