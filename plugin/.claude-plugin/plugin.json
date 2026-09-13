@@ -1,7 +1,7 @@
 {
   "name": "library",
   "description": "个人知识库：本地 .md + SQLite FTS5 trigram 全文检索。飞书文件整理入库（摘要 + 双链 + 标签）与自然语言检索问答；自带飞书云文档/多维表格只读 MCP；默认只读，写入需显式开启",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "author": {
     "name": "jesonliu"
   },
